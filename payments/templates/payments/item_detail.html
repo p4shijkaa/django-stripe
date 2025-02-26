@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }}</title>
+    <script src="https://js.stripe.com/v3/"></script> <!-- Подключите Stripe.js -->
+</head>
+<body>
+    <div id="itemDetails">
+        <p><strong>Название:</strong> {{ item.name }}</p>
+        <p><strong>Описание:</strong> {{ item.description }}</p>
+        <p><strong>Цена:</strong> {{ item.price }} руб.</p>
+    </div>
+    <button id="buyButton">Купить</button> <!-- Кнопка с id="buyButton" -->
+
+    <script>
+        const itemId = {{ item.id }}; // ID товара из Django
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const buyButton = document.getElementById('buyButton');
+            if (buyButton) {
+                buyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`/payments/buy/${itemId}/`);
+                        if (!response.ok) {
+                            throw new Error('Ошибка при получении sessionId');
+                        }
+
+                        const { sessionId } = await response.json();
+                        const stripe = Stripe('{{ STRIPE_TEST_PUBLIC_KEY }}');
+                        const result = await stripe.redirectToCheckout({ sessionId });
+
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        alert('Произошла ошибка при попытке оплаты.');
+                    }
+                });
+            } else {
+                console.error('Элемент с id="buyButton" не найден.');
+            }
+        });
+    </script>
+</body>
+</html>
