@@ -1,15 +1,6 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: myproject
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -20,8 +11,3 @@ services:
     environment:
       STRIPE_TEST_PUBLIC_KEY: "${STRIPE_TEST_PUBLIC_KEY}"
       STRIPE_TEST_SECRET_KEY: "${STRIPE_TEST_SECRET_KEY}"
-    depends_on:
-      - db
-
-volumes:
-  postgres_data:
