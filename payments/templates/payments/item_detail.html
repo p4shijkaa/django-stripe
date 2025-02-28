@@ -3,104 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ item.name }}</title>
+    <title>Order {{ order.id }}</title>
     <script src="https://js.stripe.com/v3/"></script>
-    <style>
+   <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color: #f0f8ff;
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
         }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
         h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
             color: #333;
         }
-        p {
-            font-size: 1rem;
-            color: #666;
-            margin-bottom: 1.5rem;
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
         }
-        #card-element {
-            margin-bottom: 1.5rem;
+        input[type="text"] {
+            width: 100%;
             padding: 10px;
+            margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
-            background: #f9f9f9;
         }
         button {
-            background: #5469d4;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
-        }
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 20%;
+        margin: 0 auto;
+        display: block;
+    }
         button:hover {
-            background: #4257b2;
+            background-color: #45a049;
         }
-        .message {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #666;
+        a {
+            display: block;
+            margin-top: 20px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>{{ item.name }}</h1>
-        <p>{{ item.description }}</p>
-        <p><strong>Цена:</strong> {{ item.price }} {{ item.currency|upper }}</p>
-
-        <form id="payment-form">
-            <div id="card-element">
-            </div>
-            <button id="submit-button">Оплатить {{ item.price }} {{ item.currency|upper }}</button>
-            <div id="error-message" class="message"></div>
-        </form>
-    </div>
+    <h1>Order {{ order.id }}</h1>
+    <ul>
+        {% for item in order.orderitem_set.all %}
+            <li>{{ item.quantity }} x {{ item.item.name }} - {{ item.item.price }} {{ item.item.currency|upper }}</li>
+        {% endfor %}
+    </ul>
+    <p>Total: {{ order.total_price }} {{ order.items.first.currency|upper }}</p>
+    <button id="buy-button">Оплатить</button>
 
     <script>
-        const stripe = Stripe('{{ stripe_public_key }}');
-        const itemId = {{ item.id }};
+        const stripe = Stripe('{{ stripe_public_key  }}');  // Публичный ключ Stripe
+        const orderId = {{ order.id }};
 
-        const elements = stripe.elements();
-        const cardElement = elements.create('card');
-        cardElement.mount('#card-element');
-
-        const form = document.getElementById('payment-form');
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const response = await fetch(`/payments/buy/${itemId}/`);
-            const { clientSecret } = await response.json();
-
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: cardElement,
-                },
-            });
-
-            if (error) {
-                document.getElementById('error-message').textContent = error.message;
-            } else {
-                document.getElementById('error-message').textContent = `Оплата прошла успешно! ID платежа: ${paymentIntent.id}`;
-            }
+        document.getElementById('buy-button').addEventListener('click', async () => {
+            const response = await fetch(`/payments/create-checkout-session/${orderId}/`);
+            const { id: sessionId } = await response.json();
+            await stripe.redirectToCheckout({ sessionId });
         });
     </script>
 </body>
