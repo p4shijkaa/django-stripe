@@ -13,8 +13,8 @@ class Item(models.Model):
 
 class Order(models.Model):
 	items = models.ManyToManyField(Item, through='OrderItem')
-	discount = models.ForeignKey('Discount', on_delete=models.SET_NULL, null=True, blank=True)  # Скидка
-	tax = models.ForeignKey('Tax', on_delete=models.SET_NULL, null=True, blank=True)  # Налог
+	discount = models.ForeignKey('Discount', on_delete=models.SET_NULL, null=True, blank=True)
+	tax = models.ForeignKey('Tax', on_delete=models.SET_NULL, null=True, blank=True)
 
 	def total_price(self):
 		return sum(order_item.item.price * order_item.quantity for order_item in self.orderitem_set.all())
@@ -33,8 +33,8 @@ class OrderItem(models.Model):
 
 
 class Discount(models.Model):
-	amount = models.DecimalField(max_digits=5, decimal_places=2)  # Сумма скидки
-	code = models.CharField(max_length=50, blank=True, null=True)  # Код скидки
+	amount = models.DecimalField(max_digits=5, decimal_places=2)
+	code = models.CharField(max_length=50, blank=True, null=True)
 
 	def __str__(self):
 		return f"Скидка {self.amount}%"

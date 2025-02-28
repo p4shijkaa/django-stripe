@@ -71,7 +71,7 @@
     <button id="buy-button">Оплатить</button>
 
     <script>
-        const stripe = Stripe('{{ stripe_public_key  }}');  // Публичный ключ Stripe
+        const stripe = Stripe('{{ stripe_public_key  }}');
         const orderId = {{ order.id }};
 
         document.getElementById('buy-button').addEventListener('click', async () => {
