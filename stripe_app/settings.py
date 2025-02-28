@@ -134,5 +134,5 @@ STRIPE_TEST_SECRET_KEY = config("STRIPE_TEST_SECRET_KEY")
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Разрешите домен вашего фронтенда
+    "http://localhost:3000",
 ]
